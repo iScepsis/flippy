@@ -1,0 +1,69 @@
+/* ----------------------------------------------------------------
+    Содержание:
+    ---------------------------------------------------------------
+
+    1. Основные блоки конструкции
+    2. Новости
+
+
+
+*/
+
+
+/*---------------- 1. ОСНОВНЫЕ БЛОКИ КОНСТРУКЦИИ  ---------------------------*/
+p {
+   text-indent: 20px;
+}
+
+
+/*------------------------------- 2. НОВОСТИ  -------------------------------*/
+.news-block{
+    border-bottom: 2px dotted #4E5D6C;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    min-height: 100px;
+}
+
+.news-title{
+    background-color: #4E5D6C;
+    padding-left: 8px;
+    margin-top: 0px;
+    border-left:9px solid #df691a;
+    color: #ebebeb;
+}
+
+.news-title:hover{
+    color: #df691a;
+}
+
+.news-block-main a:hover{
+    text-decoration: none;
+}
+
+.news-mini-img-div{
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+    float: left;
+}
+
+.news-mini-img{
+    width: 100px;
+    float: left;
+    display: block;
+}
+
+.news-block-main{
+    margin-left: 110px;
+}
+
+.pills-content{
+    display: none;
+}
+
+.pills-content>.pill-pane{
+    display: none;
+}
+
+
+
