@@ -8,7 +8,7 @@
             <div class="panel-body">
                 <ul id="sortable" class="nav nav-pills nav-stacked">
                     {foreach from=$data['page'] item=val}
-                        <li class="ui-state-default" data-id="{$val.p_id}">
+                        <li class="ui-state-default" data-id="{$val.p_id}" data-readonly="{$val.readonly}">
                             {$val.p_title}
                         </li>
                     {/foreach}

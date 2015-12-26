@@ -5,9 +5,15 @@
                 <img src="img/logo.png" alt="logo" height="190px" />
             </p>
             <h3>Авторизация</h3>
-            <p><input type="text" name="login" maxlength="20" /></p>
-            <p><input type="text" name="password" maxlength="20" /></p>
-            <p><a class="btn btn-primary btn-lg" onclick="authorization();">Войти</a></p>
+            <form method="post" action="admintools/authorizate/">
+                <p><input type="text" name="login" maxlength="20" /></p>
+                <p><input type="password" name="password" maxlength="20" /></p>
+                <p><button class="btn btn-primary btn-lg" type="submit">Войти</button></p>
+            </form>
+
+            {if isset($data.denied) && $data.denied}
+                <p class="message text-danger">Неверный логин или пароль.</p>
+            {/if}
         </div>
     </div>
 </div>

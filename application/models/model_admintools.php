@@ -24,8 +24,8 @@ class Model_AdminTools extends Model
     public $sql_get_tpl_name = "SELECT tpl_name FROM records WHERE id_record = :id_record";
 
     //Получение данных для меню в разделе страниц
-    public $sql_get_page_menu = "SELECT p_id, p_view, p_title, m_id FROM pages
-                                 INNER JOIN meta ON m_id = p_meta_fid";
+    public $sql_get_page_menu = "SELECT p_id, p_view, p_title, m_id, readonly FROM pages
+                                 INNER JOIN meta ON m_id = p_meta_fid ORDER BY sort";
 
     //Получение списка записей для добавления разделов
     public $sql_get_records_list = "SELECT id_record, name_record FROM records ORDER BY creation_date DESC";
@@ -63,10 +63,33 @@ class Model_AdminTools extends Model
 
     public $sql_delete_section = "DELETE FROM menus_sections WHERE id_section = :id_section";
 
+    public $sql_get_users = "SELECT * FROM users ORDER BY login, role";
+
+    private $sql_auth_user = "SELECT role FROM users WHERE login = :login AND password = :password";
+
+    private $sql_get_user_for_edit = "SELECT id_user, login, role FROM users WHERE id_user = :id_user";
+
+    private $sql_check_repeat_login = "SELECT id_user FROM users WHERE login = :login";
+
+    private $sql_create_user = "INSERT INTO users(login, password, role) VALUES (:login, :password, :role)";
+
+    private $sql_update_user = "UPDATE users SET password = :password, role = :role WHERE id_user = :id";
+
+    private $sql_delete_user = "DELETE FROM users WHERE id_user = :id";
 
 
     public function __construct(){
         $this->db = Db::getInstance();
+    }
+
+    public function auth_user($login, $pass){
+        $query = $this->db->get_elements($this->sql_auth_user, array('login' => $login, 'password' => sha1($pass)));
+        if ($query && $query[0]['role']) {
+            $_SESSION['login'] = $login;
+            $_SESSION['role'] = $query[0]['role'];
+            return true;
+        } else
+            return false;
     }
 
     /**
@@ -409,7 +432,7 @@ class Model_AdminTools extends Model
 
     /** Редактирование меню
      *
-     * @param $menu_id
+     * @param $menu_id - id меню, которое будет редактироваться
      */
     public function get_menu_for_edit($menu_id){
         $data['base'] = $this->db->get_elements($this->sql_get_menu_for_edit, array('id_menu' => $menu_id));
@@ -417,6 +440,73 @@ class Model_AdminTools extends Model
         $data['sections'] = $this->db->get_elements($this->sql_get_menu_elements_for_edit, array('fid_menu' => $menu_id));
         $data['records_list'] = $this->db->get_elements($this->sql_get_records_list);
         return $data;
+    }
+
+    /**Получаем список пользователей для редактирования или удаления
+     *
+     * @return array|string
+     */
+    public function get_users() {
+        $data = $this->db->get_elements($this->sql_get_users);
+        return $data;
+    }
+
+    /**Получаем данные для редактирования пользователя
+     *
+     * @param $id_user
+     * @return array|string
+     */
+    public function get_user_for_edit($id_user){
+        $data = $this->db->get_elements($this->sql_get_user_for_edit, array('id_user' => $id_user));
+        return $data[0];
+    }
+
+    /**Создание нового пользователя
+     *
+     * @param $login - логин
+     * @param $pass - пароль (пароль будет зашифрован в sha1)
+     * @param $role - роль пользователя
+     */
+    public function create_user($login, $pass, $role){
+        $find_repeat = $this->db->get_elements($this->sql_check_repeat_login, array('login' => $login));
+        if (count($find_repeat) > 0) {
+            die("<p class='text-danger'>Пользователь с логином <b class='text-warning'>" . $login . "</b> уже существует</p>");
+        }
+
+        $result = $this->db->sql_execute($this->sql_create_user, array('login' => $login, 'password' => sha1($pass), 'role' => $role));
+        if ($result) {
+            echo 1;
+        } else {
+            die('Не удалось создать пользователя: ' . $result);
+        }
+    }
+
+    /**Изменение данных пользователя
+     *
+     * @param $id - id изменяемого пользователя
+     * @param $pass - пароль (пароль будет зашифрован в sha1)
+     * @param $role - роль пользователя
+     */
+    public function update_user($id, $pass, $role){
+        $result = $this->db->sql_execute($this->sql_update_user, array('id' => $id,'password' => sha1($pass), 'role' => $role));
+        if ($result) {
+            echo 1;
+        } else {
+            die('Не удалось изменить данные пользователя: ' . $result);
+        }
+    }
+
+    /**Изменение данных пользователя
+     *
+     * @param $id - id изменяемого пользователя
+     */
+    public function delete_user($id){
+        $result = $this->db->sql_execute($this->sql_delete_user, array('id' => $id));
+        if ($result) {
+            echo 1;
+        } else {
+            die('Не удалось удалить пользователя: ' . $result);
+        }
     }
 
     /**
@@ -509,6 +599,8 @@ class Model_AdminTools extends Model
         return $menu_content;
     }
 
+    /*private function check_password($pass){
 
+    }*/
 
 }

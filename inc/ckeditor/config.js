@@ -7,6 +7,8 @@ CKEDITOR.editorConfig = function( config ) {
 	// Define changes to default configuration here. For example:
 	// config.language = 'fr';
 	//config.uiColor = '#2b3e50';							//Цвет редактора
-    config.disableNativeSpellChecker = false;			//Отключаем проверку орфографии CKEditor'a
-	config.extraPlugins = 'base64image';  				//Загрузка изображений в формат base64
+    config.removePlugins = 'image';
+    //config.disableNativeSpellChecker = false;			//Отключаем проверку орфографии CKEditor'a
+    config.extraPlugins = 'base64image';  				//Загрузка изображений в формат base64
+    //config.extraPlugins = 'menus';
 };

@@ -14,8 +14,8 @@ class View
      */
     function generate($content_view, $layout = null, $data = null)
     {
-        require_once "/inc/smarty/Smarty.class.php";
-        require_once "/inc/classes/smarty_singleton.class.php";
+        require_once "./inc/smarty/Smarty.class.php";
+        require_once "./inc/classes/smarty_singleton.class.php";
 
         $smarty = Smarty_Singleton::getInstance();
 

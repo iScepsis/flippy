@@ -1,20 +1,49 @@
 <?php
-session_start();
-$_SESSION['user_name'] = 'dev';
 
 class Controller_AdminTools extends Controller
 {
 
     function __construct()
     {
-        $this->model = new Model_AdminTools();
-        $this->view  = new View();
+        session_start();
 
+        $this->view  = new View();
+        $this->model = new Model_AdminTools();
+
+        if (!empty($_POST['login']) && !empty($_POST['password'])) {
+            $this->LogIn();
+        }
+
+        if (empty($_SESSION['login'])) {
+            $this->action_auth();
+        }
     }
 
     function action_index()
     {
         $this->view->generate('admin/admin_view.tpl', 'admin_layout.tpl');
+    }
+
+    function action_auth(){
+        $this->view->generate('admin/auth_view.tpl', 'auth_layout.tpl');
+        die();
+    }
+
+    function action_logout(){
+        session_destroy();
+        $this->view->generate('admin/auth_view.tpl', 'auth_layout.tpl');
+    }
+
+    private function logIn(){
+        if (empty($_POST['login'])) die("Не указан логин");
+        if (empty($_POST['password'])) die("Не указан пароль");
+
+        if ($this->model->auth_user($_POST['login'], $_POST['password'])) {
+            $this->view->generate('admin/admin_view.tpl', 'admin_layout.tpl');
+        } else {
+            $this->view->generate('admin/auth_view.tpl', 'auth_layout.tpl', array('denied' => true));
+        }
+        die();
     }
 
     function action_pages(){
@@ -25,6 +54,11 @@ class Controller_AdminTools extends Controller
     function action_records(){
         $data['records'] = $this->model->get_records('creation_date', true);
         $this->view->generate('admin/records_view.tpl', 'admin_layout.tpl', $data);
+    }
+
+    function action_users(){
+        $data['users'] = $this->model->get_users();
+        $this->view->generate('admin/users_view.tpl', 'admin_layout.tpl', $data);
     }
 
     function action_add_records(){
@@ -51,6 +85,17 @@ class Controller_AdminTools extends Controller
             $data['records_list'] = $this->model->get_records_list();
             $data['menu_edit'] = $this->model->get_menu_for_edit((int)Route::$params['menu']);
             $this->view->generate('admin/edit_menu_view.tpl', 'admin_layout.tpl', $data);
+        }
+    }
+
+    function action_add_user(){
+        $this->view->generate('admin/add_user_view.tpl', 'admin_layout.tpl');
+    }
+
+    function action_edit_user(){
+        if (!empty(Route::$params['user'])) {
+            $data['user'] = $this->model->get_user_for_edit((int)Route::$params['user']);
+            $this->view->generate('admin/edit_user_view.tpl', 'admin_layout.tpl', $data);
         }
     }
 
@@ -102,7 +147,6 @@ class Controller_AdminTools extends Controller
         if (empty($_POST['typeMenu']))  die("Не передан тип меню");
         if (empty($_POST['sections']))  die("Нет идентификатора меню");
 
-
         if ($result = $this->model->update_menu($_POST)) {
             print("Меню успешно обновлено");
         }
@@ -116,6 +160,26 @@ class Controller_AdminTools extends Controller
         return $data;
     }
 
+    function action_create_user(){
+        if (empty($_POST['login'])) die("Не передан логин пользователя");
+        if (empty($_POST['pass']))  die("Не передан пароль");
+        if (empty($_POST['role']))  die("Не передана роль пользователя");
 
+        $this->model->create_user($_POST['login'], $_POST['pass'], $_POST['role']);
+    }
+
+    function action_update_user(){
+        if (empty($_POST['id']))    die("Не передан id пользователя");
+        if (empty($_POST['pass']))  die("Не передан пароль");
+        if (empty($_POST['role']))  die("Не передана роль пользователя");
+
+        $this->model->update_user($_POST['id'], $_POST['pass'], $_POST['role']);
+    }
+
+    function action_delete_user(){
+        if (empty($_POST['id']))    die("Не передан id пользователя");
+
+        $this->model->delete_user($_POST['id']);
+    }
 
 }
