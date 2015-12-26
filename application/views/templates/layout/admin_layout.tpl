@@ -7,13 +7,13 @@
     <nav class="navbar navbar-inverse navbar-static-top">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    {*<button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
                             data-target="#bs-example-navbar-collapse-2">
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
-                    </button>
+                    </button>*}
                     <a class="navbar-brand" href="admintools/">Админка</a>
                 </div>
 
@@ -35,23 +35,21 @@
                                 <li><a href="admintools/add_menus/">Добавить меню</a></li>
                             </ul>
                         </li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                               aria-expanded="false">Редактор <span class="caret"></span></a>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a href="admintools/pages/">Страницы</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something else here</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#">Separated link</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#">One more separated link</a></li>
-                            </ul>
-                        </li>
+
+                        <li><a href="admintools/users/">Пользователи</a></li>
+
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="#">Link</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                <span>{$smarty.session.login}</span>
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="admintools/logout/">Выход</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -5,6 +5,9 @@ $(function() {
         revert: true
     });
 
+    //Включение тултипов в документе
+    $(document).tooltip();
+
     //Редактирование разделов для меню
     $( "#edit_sections, #drop_sections" ).sortable({
         revert: true,
@@ -27,7 +30,17 @@ $(function() {
 
 });
 //----------- END DOCUMENT READY ---------------//
-var droped_record_id = '';
+
+//----------- REGEXP -----------------//
+var regexp_check_login = /^[a-z]+[a-z0-9_-]{2,19}$/i;
+var regexp_check_pass  = /^[a-z0-9_-]{3,20}$/i;
+
+//------------------------------------//
+
+
+
+var droped_record_id = '',
+    droped_user_id = '';
 
 var defObj = {
     type: 'post',
@@ -397,7 +410,11 @@ function hide_menu_preview(obj){
     $(next_tr).slideUp();
 }
 
-
+/**
+ * Редактирование меню
+ *
+ * @param obj
+ */
 function edit_menu(obj){
     var parent = $(obj).closest('.edit_menu');
 
@@ -458,6 +475,165 @@ function edit_menu(obj){
     $.ajax(tObj);
 }
 
+/**
+ * Создание пользователя
+ *
+ * @param obj
+ */
+function create_user(obj){
+    $(".save-btn").prop('disabled', true);
+    var parent = $(obj).closest('.add_user');
+
+    var login  = $.trim($(parent).find('input[name="login"]').val()),
+        pass   = $.trim($(parent).find('input[name="password"]').val()),
+        r_pass = $.trim($(parent).find('input[name="repeat_password"]').val()),
+        role   = $(parent).find('[name="role"] option:selected').val();
+
+    //Проверка введенных значений
+    if (!check_login(login)) return;
+    if (!check_password(pass)) return;
+    if (pass != r_pass) {
+        $('.mismatch-pswd').fadeIn(300);
+        $(".save-btn").prop('disabled', false);
+        return;
+    }
+
+    var tObj = Object.create(defObj);
+    tObj.url = 'admintools/create_user/';
+    tObj.data = Object.create(defObj.data);
+    tObj.data.login = login;
+    tObj.data.pass  = pass;
+    tObj.data.role  = role;
+
+    tObj.success = function(data){
+        if (data == '1')
+            show_dialog("Пользователь <b>" + login + "</b> успешно создан");
+        else
+            show_dialog(data);
+        $(".save-btn").prop('disabled', false);
+    }
+
+    tObj.error = function(data){
+        $(".save-btn").prop('disabled', false);
+        show_dialog(data, 'Ошибка');
+    }
+
+    $.ajax(tObj);
+}
+
+/**
+ * Изменение пользователя
+ *
+ * @param obj
+ */
+function update_user(obj){
+    $(".save-btn").prop('disabled', true);
+    var parent = $(obj).closest('.edit_user');
+
+    var pass   = $.trim($(parent).find('input[name="password"]').val()),
+        r_pass = $.trim($(parent).find('input[name="repeat_password"]').val()),
+        role   = $(parent).find('[name="role"] option:selected').val();
+
+    //Проверка введенных значений
+    if (!check_password(pass)) return;
+    if (pass != r_pass) {
+        $('.mismatch-pswd').fadeIn(300);
+        $(".save-btn").prop('disabled', false);
+        return;
+    }
+
+    var tObj = Object.create(defObj);
+    tObj.url = 'admintools/update_user/';
+    tObj.data = Object.create(defObj.data);
+    tObj.data.id    = $(parent).attr('data-record-id');
+    tObj.data.pass  = pass;
+    tObj.data.role  = role;
+
+    tObj.success = function(data){
+        if (data == '1')
+            show_dialog("Данные пользователя успешно изменены");
+        else
+            show_dialog(data);
+        $(".save-btn").prop('disabled', false);
+    }
+
+    tObj.error = function(data){
+        $(".save-btn").prop('disabled', false);
+        show_dialog(data, 'Ошибка');
+    }
+
+    $.ajax(tObj);
+}
+
+/**
+ * Проверка логина
+ *
+ * @param login
+ * @returns {boolean}
+ */
+function check_login(login){
+    $(".incorrect-login").fadeOut(300);
+    if (!regexp_check_login.test(pass)) {
+        $(".incorrect-login").fadeIn(300);
+        $(".save-btn").prop('disabled', false);
+        return false;
+    } else {
+        return true;
+    }
+}
+
+/**
+ * Проверка пароля
+ *
+ * @param pass
+ * @returns {boolean}
+ */
+function check_password(pass){
+    $(".incorrect-pswd").fadeOut(300);
+    if (!regexp_check_pass.test(pass)) {
+        $(".incorrect-pswd").fadeIn(300);
+        $(".save-btn").prop('disabled', false);
+        return false;
+    } else {
+        return true;
+    }
+}
+
+/**Confirm перед удалением пользователя
+ *
+ * @param obj
+ */
+function ask_about_drop_user(obj){
+    droped_user_id = $(obj).closest('tr').attr('data-user-id');
+    var user_name = $(obj).closest('tr').attr('data-user-login'),
+        str = "Вы действительно хотите удалить запись: <br> " + user_name,
+        title = "Подтверждение удаления пользователя";
+    show_confirm(str, drop_user, title);
+}
+
+/**
+ * Удаление записи
+ *
+ */
+function drop_user(){
+    close_dialog();
+
+    var tObj = Object.create(defObj);
+    tObj.url = 'admintools/delete_user/';
+
+    tObj.data = Object.create(defObj.data);
+    tObj.data.id = droped_user_id;
+
+    tObj.success = function(data){
+        if (parseInt(data) != data) {
+            show_dialog(data, 'Ошибка');
+        } else {
+            $('#users_list').find('tr[data-user-id="' + droped_user_id + '"]').slideUp(300);
+            droped_user_id = '';
+        }
+    }
+    $.ajax(tObj);
+}
 
 // JQUERY COMBOBOX //
 

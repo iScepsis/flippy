@@ -3,9 +3,9 @@
 }
 
 .sortable li, #edit_sections li {
-    width: 300px;
+    width: 100%;
     min-height: 45px;
-    margin: 0 10px 10px 10px !important;
+    margin: 10px 0px !important;
     color: #fff;
     text-align: center;
     /*line-height: 45px;*/
@@ -14,9 +14,9 @@
 }
 
 #drop_sections li {
-    width: 300px;
+    width: 100%;
     min-height: 45px;
-    margin: 0 10px 10px 10px !important;
+    margin: 10px 0px !important;
     color: #999;
     background-color: #3d4954 !important;
     text-align: center;
@@ -26,7 +26,7 @@
 }
 
 #drop_sections{
-    padding-top: 10px;
+    padding: 0 10px;
     border: 4px dashed #999;
     min-height: 50px;
 }
@@ -42,16 +42,16 @@
     border: 1px solid #2B3E50;
 }
 
-.drop_record, .drop_menu{
+.drop_item{
     color: #d9534f;
     cursor: pointer;
 }
 
-.drop_record:hover, .drop_menu:hover{
+.drop_item:hover{
     color: #df691a;
 }
 
-.drop_record:active, .drop_menu:active{
+.drop_item:active{
     color: #f0ad4e;
 }
 
@@ -86,11 +86,11 @@
 }
 
 .add-menu-sortable-active{
-    box-shadow: 0 0 10px #4385ff;
+    box-shadow: 0 0 10px #df691a;
 }
 
 .glyphicon-arrow-down:hover, .glyphicon-arrow-up:hover{
-    box-shadow: 0 0 7px #4385ff;
+    box-shadow: 0 0 7px #df691a;
     cursor: pointer;
 }
 
