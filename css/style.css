@@ -1,3 +1,8 @@
+* {
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 12pt;
+    outline: none !important;
+}
 /* ----------------------------------------------------------------
     Содержание:
     ---------------------------------------------------------------
@@ -14,6 +19,34 @@
 p {
    text-indent: 20px;
 }
+
+blockquote {
+    line-height: 10px;
+    margin: 2px 0;
+}
+
+.head-hr{
+    margin: 3px 0 0;
+    color: #df691a;
+    border: none; /* Убираем границу для браузера Firefox */
+    background-color: #df691a;; /* Цвет линии для браузера Firefox и Opera */
+    height: 6px; /* Толщина линии */
+}
+
+.site-header{
+    border-bottom: 1px solid #4E5D6C;
+    margin-bottom: 15px;
+}
+
+.right-header{
+    padding: 18px;
+}
+
+.search-btn {
+    height: 39px;
+    padding: 9px 15px;
+}
+
 
 
 /*------------------------------- 2. НОВОСТИ  -------------------------------*/
@@ -65,5 +98,7 @@ p {
     display: none;
 }
 
-
+#datepicker>.ui-datepicker{
+    width:100%;
+}
 

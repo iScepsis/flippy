@@ -1,48 +1,7 @@
-<div class="accordion">
-    <h3>Section 1</h3>
-    <div>
-        <p>
-            Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
-            ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
-            amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
-            odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
-        </p>
-    </div>
-    <h3>Section 2</h3>
-    <div>
-        <p>
-            Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
-            purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
-            velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
-            suscipit faucibus urna.
-        </p>
-    </div>
-    <h3>Section 3</h3>
-    <div>
-        <p>
-            Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
-            Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
-            ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
-            lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
-        </p>
-        <ul>
-            <li>List item one</li>
-            <li>List item two</li>
-            <li>List item three</li>
-        </ul>
-    </div>
-    <h3>Section 4</h3>
-    <div>
-        <p>
-            Cras dictum. Pellentesque habitant morbi tristique senectus et netus
-            et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
-            faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
-            mauris vel est.
-        </p>
-        <p>
-            Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
-            Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-            inceptos himenaeos.
-        </p>
-    </div>
-</div>
+<h2>Praesent scelerisque scelerisque</h2>
+
+<p><img alt="" src="img/img02.jpg" style="height:250px; width:750px" /></p>
+
+<p>This is <strong>Old Stairwell </strong>, a free, fully standards-compliant CSS template designed by <a href="http://www.freecsstemplates.org">FCT</a>. The photos in this template are from Fotogrph. This free template is released under a Creative Commons Attributions 3.0 license, so you are pretty much free to do whatever you want with it (even use it commercially) provided you keep the links in the footer intact. Aside from that, have fun with it :)</p>
+
+<p>Maecenas pede nisl, elementum eu, ornare ac, malesuada at, erat. Proin gravida orci porttitor enim accumsan lacinia. Donec condimentum, urna non molestie semper, ligula enim ornare nibh, quis laoreet eros quam eget ante. Aliquam libero. Vivamus nisl nibh, iaculis vitae, viverra sit amet, ullamcorper vitae, turpis. Aliquam erat volutpat. Vestibulum dui sem, pulvinar sed, imperdiet nec, iaculis nec, leo. Fusce odio. Etiam arcu dui, faucibus eget, placerat vel, sodales eget, orci. Donec ornare neque ac sem. Mauris aliquet. Aliquam sem leo, vulputate sed, convallis at, ultricies quis, justo. Donec nonummy magna quis risus.</p>

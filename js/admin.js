@@ -14,9 +14,16 @@ $(function() {
         connectWith: ".menu_elements"
     }).disableSelection();
 
+    //Sortable  - редактирование страниц
+    $( "#edit_pages" ).sortable({
+        change: function(event, ui) {
+            $('#save_changes').prop("disabled", false);
+        }
+    }).disableSelection();
+
     $(".ck_editor").ckeditor();
 
-    $( "#combobox" ).combobox();
+    $( "#combobox, #combobox_1, #combobox_2" ).combobox();
 
     //Событие клика по добавленному разделу в меню сортировки
     $(".menu_elements").on("click", ".add-menu-sortable", function(){
@@ -26,7 +33,13 @@ $(function() {
     //Подсказка для стрелки предпросмотра при выводи списка меню
     $('.glyphicon-arrow-down').tooltip();
 
+    $('.question_mark').on('click', function(){
+        var text = $(this).next('.question_mark_text').html();
+        if ($.trim(text) != '' || typeof text != "undefined") {
+            show_dialog(text, "Информация");
+        }
 
+    })
 
 });
 //----------- END DOCUMENT READY ---------------//
@@ -34,7 +47,7 @@ $(function() {
 //----------- REGEXP -----------------//
 var regexp_check_login = /^[a-z]+[a-z0-9_-]{2,19}$/i;
 var regexp_check_pass  = /^[a-z0-9_-]{3,20}$/i;
-
+var regexp_check_p_view = /^[a-z]+[a-z0-9_]+$/;
 //------------------------------------//
 
 
@@ -281,9 +294,6 @@ function change_section_name(obj){
 function change_record_info(){
     var changed = $('.add-menu-sortable-active');
     var fid_record = $('#combobox').combobox('getVal');
-
-    console.log(fid_record);
-    //console.log(changed);
 
     $(changed).attr('data-text_record', fid_record['text']);
     $(changed).attr('data-fid_record', fid_record['value']);
@@ -573,7 +583,7 @@ function update_user(obj){
  */
 function check_login(login){
     $(".incorrect-login").fadeOut(300);
-    if (!regexp_check_login.test(pass)) {
+    if (!regexp_check_login.test(login)) {
         $(".incorrect-login").fadeIn(300);
         $(".save-btn").prop('disabled', false);
         return false;
@@ -633,6 +643,199 @@ function drop_user(){
         }
     }
     $.ajax(tObj);
+}
+
+function show_p_text(obj){
+    $('#p_text').children().hide();
+    var val = $(obj).find('option:selected').val();
+    if (val == '1'){
+        $('#p_text_' + val).css({
+            visibility: "hidden",
+            display: "none"
+        });
+        $('#cke_editor' + val).fadeIn(300);
+    } else {
+        $('#p_text_' + val).fadeIn(300);
+    }
+}
+
+function delete_page(obj){
+    $(obj).prop('disabled', true);
+    var parent = $(obj).closest('.li_pages_sortable'),
+        id = $(parent).attr('data-id');
+    var tObj = Object.create(defObj);
+    tObj.url = 'admintools/delete_page/';
+
+    tObj.data = Object.create(defObj.data);
+    tObj.data.id = id;
+
+    tObj.success = function(data){
+        if (data == "1") {
+            show_dialog("Страница успешно удалена");
+        }
+        $(obj).prop('disabled', false);
+    }
+    $.ajax(tObj);
+}
+
+/**Создание страницы
+ *
+ * @param obj
+ * @returns {boolean}
+ */
+function save_pages(obj){
+    $(obj).prop('disabled', true);
+    var parent   = $(obj).closest('.new_pages'),
+        p_title  = $(parent).find('[name="p_title"]').val(),
+        p_view   = $(parent).find('[name="p_view"]').val(),
+        meta_key = $(parent).find('[name="meta_key"]').val(),
+        meta_d   = $(parent).find('[name="meta_description"]').val(),
+        error = 0;
+
+    if (p_title == "") error = "Не указан загловок страницы";
+    if (p_view == "") error = "Не указано название страницы в URL";
+    if (!regexp_check_p_view.test(p_view)) error = "Некорректное название страницы в URL";
+
+    switch ($(parent).find('.page_content option:selected').val()) {
+        case '1':
+            var p_text = {type: 'ckeditor', content: CKEDITOR.instances.editor1.getData()};
+            break;
+        case '2':
+            var p_text = {type: 'record', content: $('#combobox_1').combobox('getVal')};
+            break;
+        case '3':
+            var p_text = {type: 'menu', content: $('#combobox_2').combobox('getVal')}
+            break;
+    }
+    
+    if ($.trim(p_text.content) == "" || p_text.content === undefined || p_text.content === null) {
+        error = "Не указано содержимое страницы";
+    }
+
+    if (error != 0) {
+        show_dialog(error, 'Ошибка');
+        $(obj).prop('disabled', false);
+        return false;
+    }
+    
+    var tObj = Object.create(defObj);
+    tObj.url = 'admintools/create_page/';
+
+    tObj.data = Object.create(defObj.data);
+    tObj.data.p_title = p_title;
+    tObj.data.p_view = p_view;
+    tObj.data.meta_key = meta_key;
+    tObj.data.meta_description = meta_d;
+    tObj.data.p_text = p_text;
+
+    tObj.success = function(data){
+        if (data == "1") {
+            show_dialog("Страница успешно добавлена");
+        } else {
+            show_dialog("Не удалось создать страницу. <br /> " + data, "Ошибка");
+        }
+        $(obj).prop('disabled', false);
+    }
+    $.ajax(tObj);
+}
+
+/**Обновление страницы
+ *
+ * @param obj
+ * @returns {boolean}
+ */
+function edit_page(obj){
+    $(obj).prop('disabled', true);
+    var parent   = $(obj).closest('.edit_page'),
+        p_id     = $(parent).data('id'),
+        meta_fid = $(parent).data('meta-fid'),
+        p_title  = $(parent).find('[name="p_title"]').val(),
+        p_view   = $(parent).find('[name="p_view"]').val(),
+        meta_key = $(parent).find('[name="meta_key"]').val(),
+        meta_d   = $(parent).find('[name="meta_description"]').val(),
+        error = 0;
+
+    if (p_title == "") error = "Не указан загловок страницы";
+    if (p_view == "") error = "Не указано название страницы в URL";
+    if (!regexp_check_p_view.test(p_view)) error = "Некорректное название страницы в URL";
+
+    switch ($(parent).find('.page_content option:selected').val()) {
+        case '1':
+            var p_text = {type: 'ckeditor', content: CKEDITOR.instances.editor1.getData()};
+            break;
+        case '2':
+            var p_text = {type: 'record', content: $('#combobox_1').combobox('getVal')};
+            break;
+        case '3':
+            var p_text = {type: 'menu', content: $('#combobox_2').combobox('getVal')}
+            break;
+    }
+
+    if ($.trim(p_text.content) == "" || p_text.content === undefined || p_text.content === null) {
+        error = "Не указано содержимое страницы";
+    }
+
+    if (error != 0) {
+        show_dialog(error, 'Ошибка');
+        $(obj).prop('disabled', false);
+        return false;
+    }
+
+    var tObj = Object.create(defObj);
+    tObj.url = 'admintools/update_page/';
+
+    tObj.data = Object.create(defObj.data);
+    tObj.data.p_title = p_title;
+    tObj.data.p_id = p_id;
+    tObj.data.m_id = meta_fid;
+    tObj.data.p_view = p_view;
+    tObj.data.meta_key = meta_key;
+    tObj.data.meta_description = meta_d;
+    tObj.data.p_text = p_text;
+
+    tObj.success = function(data){
+        if (data == "1") {
+            show_dialog("Страница успешно изменена");
+        } else {
+            show_dialog("Не удалось изменить страницу. <br /> " + data, "Ошибка");
+        }
+        $(obj).prop('disabled', false);
+    }
+    $.ajax(tObj);
+}
+
+function check_input_for_regexp(field, regexp) {
+    if (regexp.test($(field).val())) {
+        $(field).closest('.form-group').removeClass('has-error');
+    } else {
+        $(field).closest('.form-group').removeClass('has-success').addClass('has-error');
+    }
+}
+
+function save_page_sort(obj){
+    $(obj).prop('disabled', true)
+    var list = $('#edit_pages li'),
+        el = {};
+    $(list).each(function(k, v){
+        el[k] = {};
+        el[k]['key'] = k + 1;
+        el[k]['p_id'] = $(v).data('id');
+    });
+    var tObj = Object.create(defObj);
+    tObj.url = 'admintools/save_page_sort/';
+    tObj.data = Object.create(defObj.data);
+    tObj.data.elements = el;
+
+    tObj.success = function(data){
+        if (data == "1") {
+            show_dialog("Сортировка страниц успешно обновлена");
+        } else {
+            show_dialog(data, "Ошибка");
+        }
+        $(obj).prop('disabled', false);
+    }
+    $.ajax(tObj);
+
 }
 
 // JQUERY COMBOBOX //

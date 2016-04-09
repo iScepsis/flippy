@@ -3,7 +3,7 @@ class Model_Default extends Model
 {
     public $db;
 
-    public $sql_get_menu = "SELECT p_view, p_title FROM pages";
+    public $sql_get_menu = "SELECT p_view, p_title FROM pages ORDER BY sort";
 
     public function get_data()
     {

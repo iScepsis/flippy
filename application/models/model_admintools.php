@@ -23,6 +23,9 @@ class Model_AdminTools extends Model
     //Получение имени шаблона
     public $sql_get_tpl_name = "SELECT tpl_name FROM records WHERE id_record = :id_record";
 
+    //Получение имени шаблона для меню
+    public $sql_get_tpl_menu = "SELECT tpl_file FROM menus WHERE id_menu = :id_menu";
+
     //Получение данных для меню в разделе страниц
     public $sql_get_page_menu = "SELECT p_id, p_view, p_title, m_id, readonly FROM pages
                                  INNER JOIN meta ON m_id = p_meta_fid ORDER BY sort";
@@ -65,6 +68,9 @@ class Model_AdminTools extends Model
 
     public $sql_get_users = "SELECT * FROM users ORDER BY login, role";
 
+    public $sql_get_page_info = "SELECT p.*, m.meta_key, m.meta_description FROM pages p
+                                 INNER JOIN meta m ON m.m_id = p.p_meta_fid WHERE p.p_id = :p_id";
+
     private $sql_auth_user = "SELECT role FROM users WHERE login = :login AND password = :password";
 
     private $sql_get_user_for_edit = "SELECT id_user, login, role FROM users WHERE id_user = :id_user";
@@ -76,6 +82,7 @@ class Model_AdminTools extends Model
     private $sql_update_user = "UPDATE users SET password = :password, role = :role WHERE id_user = :id";
 
     private $sql_delete_user = "DELETE FROM users WHERE id_user = :id";
+
 
 
     public function __construct(){
@@ -280,11 +287,13 @@ class Model_AdminTools extends Model
         switch ($data['typeMenu']) {
             case "1":
                 $type_menu = 'tabs';
-                $menu_content = $this->create_tab_menu_tpl($data, $tpl_name, $tpl_file);
+           //     $menu_content = $this->create_tab_menu_tpl($data, $tpl_name, $tpl_file);
+                $menu_content = $this->create_tab_menu_tpl($data, $tpl_name);
                 break;
             case "2":
                 $type_menu = 'pills';
-                $menu_content = $this->create_pills_menu_tpl($data, $tpl_name, $tpl_file);
+           //     $menu_content = $this->create_pills_menu_tpl($data, $tpl_name, $tpl_file);
+                $menu_content = $this->create_pills_menu_tpl($data, $tpl_name);
                 break;
             default:
                 exit("Не определен тип меню");
@@ -405,6 +414,7 @@ class Model_AdminTools extends Model
             fwrite($handle, $file_content);
             fclose($handle);
             print("Ошибка: " . $e->getMessage());
+            return false;
         }
     }
 
@@ -509,6 +519,183 @@ class Model_AdminTools extends Model
         }
     }
 
+    /** Получение списка навигационных меню и записей
+     */
+    public function get_record_and_menus_list(){
+        $result = array();
+        $result['records_list'] = $this->db->get_elements($this->sql_get_records_list);
+        $result['menus_list'] = $this->db->get_elements($this->sql_get_menus_list);
+        return $result;
+    }
+
+    private $sql_check_pages_names = "SELECT p_view, p_title FROM pages WHERE p_view = :p_view OR p_title = :p_title";
+    private $sql_get_max_sort = "SELECT max(sort) + 1 as last_sort FROM pages";
+    private $sql_create_page = "INSERT INTO pages(p_view, p_title, p_meta_fid, p_text, sort) VALUES
+                                                 (:p_view, :p_title, :p_meta_fid, :p_text, :sort)";
+    private $sql_create_meta_info = "INSERT INTO meta(meta_key, meta_description) VALUES (:m_key, :m_descr)";
+
+    /**Создание страницы
+     *
+     * @param $data
+     * @return bool
+     */
+    public function create_page($data){
+        if (empty($data['p_text']['type'])) die('Некорректный тип контента ' . var_dump($data['p_text']));
+
+        $check_names = $this->db->get_elements($this->sql_check_pages_names, array('p_view'  => $data['p_view'],
+                                                                                   'p_title' => $data['p_title']));
+        if (count($check_names) > 0) {
+            if ($check_names[0]['p_view'] == $data['p_view']) die('Страница с таким названием URL уже существует');
+            if ($check_names[0]['p_title'] == $data['p_title']) die('Страница с таким названием уже существует');
+        }
+        $mvc = array(
+        'view_file_path' => "application/views/templates/" . $data['p_view'] ."_view.tpl",
+        'controller_file_path' => "application/controllers/controller_" . $data['p_view'] .".php",
+        'model_file_path' => "application/models/model_" . $data['p_view'] .".php");
+
+        if (file_exists($mvc['view_file_path']) || file_exists($mvc['controller_file_path']) || file_exists($mvc['model_file_path'])) {
+            die("Не удалось создать MVC структуру, т.к. файлы с такими именами уже существуют");
+        }
+
+        switch($data['p_text']['type']){
+            case 'ckeditor':
+                $p_text = $data['p_text']['content'];
+                break;
+            case 'record':
+                $p_text = "{include file=\"" . $this->get_path_tpl_record($data['p_text']['content']) . "\"}";
+                break;
+            case 'menu':
+                $p_text = "{include file=\"" . $this->get_path_tpl_menu($data['p_text']['content']) . "\"}";
+                break;
+            default:
+                die("Неопределенный тип контента: " . $data['p_text']['type']);
+        }
+        //Создаем MVC файлы
+        $this->create_mvc_files($mvc, $data['p_view'], $p_text);
+
+        //Записываем мета теги
+        $meta_id = $this->create_meta_info($data['meta_key'], $data['meta_description']);
+        if (!$meta_id) die("Не удалось записать мета информацию");
+        if (!$last_sort = $this->db->get_elements($this->sql_get_max_sort))
+            die("Не удалось получить номер последней страницы");
+        $params = array('p_view' => $data['p_view'],
+                        'p_title' => $data['p_title'],
+                        'p_meta_fid' => $meta_id,
+                        'p_text' => $p_text,
+                        'sort' => $last_sort[0]['last_sort']);
+        //Записываем данные в БД
+        if (!$result = $this->db->sql_execute($this->sql_create_page, $params)) die("Не удалось сохранить данные в БД");
+        return true;
+    }
+
+    public $sql_get_page_for_id = "SELECT * FROM pages WHERE p_id = :p_id";
+    public $sql_delete_meta = "DELETE FROM meta WHERE m_id = :m_id";
+    public $sql_delete_page = "DELETE FROM pages WHERE p_id = :p_id";
+
+    /**Получение данных страницы по ее id
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function get_page_info($id) {
+        $data = $this->db->get_elements($this->sql_get_page_info, array('p_id' => $id));
+        if (!$data || empty($data[0])) {
+            Route::ErrorPage404();
+        } else {
+            return $data[0];
+        }
+    }
+
+    public $sql_update_meta_for_page = "UPDATE meta SET meta_key = :m_key, meta_description = :meta_d
+                                                    WHERE m_id = :m_id";
+    public $sql_update_page = "UPDATE pages SET p_view = :p_view, p_title = :p_title, p_text = :p_text
+                                            WHERE p_id = :p_id";
+
+    /**Обновление страницы
+     *
+     * @param $data
+     * @return bool
+     */
+    public function update_page($data){
+        if (empty($data['p_text']['type'])) die('Некорректный тип контента ' . var_dump($data['p_text']));
+
+        $mvc = array(
+            'view_file_path' => "application/views/templates/" . $data['p_view'] ."_view.tpl",
+            'controller_file_path' => "application/controllers/controller_" . $data['p_view'] .".php",
+            'model_file_path' => "application/models/model_" . $data['p_view'] .".php");
+
+        switch($data['p_text']['type']){
+            case 'ckeditor':
+                $p_text = $data['p_text']['content'];
+                break;
+            case 'record':
+                $p_text = "{include file=\"" . $this->get_path_tpl_record($data['p_text']['content']) . "\"}";
+                break;
+            case 'menu':
+                $p_text = "{include file=\"" . $this->get_path_tpl_menu($data['p_text']['content']) . "\"}";
+                break;
+            default:
+                die("Неопределенный тип контента: " . $data['p_text']['type']);
+        }
+
+        if (!file_exists($mvc['controller_file_path']) || !file_exists($mvc['model_file_path'])) {
+            //Создаем MVC файлы
+            $this->create_mvc_files($mvc, $data['p_view'], $p_text);
+        } else {
+            if (!file_put_contents($mvc['view_file_path'], $p_text)) die('Не удалось создать файл вида');
+        }
+
+        if (!$this->db->sql_execute($this->sql_update_meta_for_page, array('m_key' => $data['meta_key'],
+                                                                            'meta_d' => $data['meta_description'],
+                                                                            'm_id' => $data['m_id'] )))
+        {
+            die("Не удалось создать мета информацию");
+        };
+
+        if (!$this->db->sql_execute($this->sql_update_page, array('p_title' => $data['p_title'],
+                                                                   'p_view'  => $data['p_view'],
+                                                                   'p_text'  => $p_text,
+                                                                   'p_id'    => $data['p_id'])))
+        {
+            die("Не удалось создать страницу");
+        }
+        return true;
+    }
+
+    /**Удаление страницы
+     * @param $id
+     * @return bool
+     */
+    public function delete_page($id){
+        $fid_meta = $this->db->get_elements($this->sql_get_page_for_id, array('p_id' => $id));
+
+        if ($fid_meta && count($fid_meta) > 0) {
+            $this->db->sql_execute($this->sql_delete_meta, array('m_id' => $fid_meta[0]['p_meta_fid']) );
+            $this->db->sql_execute($this->sql_delete_page, array('p_id' => $id));
+        }
+
+        if (file_exists('./application/controllers/controller_' . $fid_meta[0]['p_view'] . '.php' )) {
+            unlink('./application/controllers/controller_' . $fid_meta[0]['p_view'] . '.php');
+        }
+        if (file_exists('./application/models/model_' . $fid_meta[0]['p_view'] . '.php' )) {
+            unlink('./application/models/model_' . $fid_meta[0]['p_view'] . '.php');
+        }
+        if (file_exists('./application/views/templates/' . $fid_meta[0]['p_view'] . '_view.tpl' )) {
+            unlink('./application/views/templates/' . $fid_meta[0]['p_view'] . '_view.tpl');
+        }
+        return true;
+    }
+
+
+    public $sql_save_page_sort = "UPDATE pages SET sort = :sort WHERE p_id = :p_id";
+    public function save_page_sort($data){
+        foreach ($data['elements'] as $item) {
+            $this->db->get_elements($this->sql_save_page_sort,
+                                    array('sort' => $item['key'], 'p_id' => $item['p_id']));
+        }
+        return true;
+    }
+
     /**
      * Получение пути до записи по ее id
      *
@@ -516,9 +703,48 @@ class Model_AdminTools extends Model
      * @return string
      */
     private function get_path_tpl_record($id_record){
-        $tpl_name = $this->db->get_elements($this->sql_get_tpl_name, array('id_record' => $id_record));
+        $tpl_name = $this->db->get_elements($this->sql_get_tpl_name, array('id_record' => $id_record['value']));
         $tpl_path = 'application/views/templates/records/' . $tpl_name[0]['tpl_name'] . '.tpl';
         return $tpl_path;
+    }
+
+    /**
+     * Получение пути до записи по ее id
+     *
+     * @param $id_menu - id меню, путь которой нужно вытащить
+     * @return string
+     */
+    private function get_path_tpl_menu($id_menu){
+        $tpl_path = $this->db->get_elements($this->sql_get_tpl_menu, array('id_menu' => $id_menu['value']));
+        return $tpl_path[0]['tpl_file'];
+    }
+
+    private function create_mvc_files($files, $name, $content){
+        $sample_controller = file_get_contents('application/samples/controller_sample.php');
+        $sample_model = file_get_contents('application/samples/model_sample.php');
+
+        $controller = str_replace("<<Sample>>", $name, $sample_controller);
+        $model = str_replace("<<Sample>>", $name, $sample_model);
+
+        if (!file_put_contents($files['view_file_path'], $content)) die ("Не удалось создать файл вида");
+        if (!file_put_contents($files['controller_file_path'], "<?php " . $controller)) die ("Не удалось создать файл контроллера");
+        if (!file_put_contents($files['model_file_path'], "<?php " . $model)) die ("Не удалось создать файл модели");
+
+        return true;
+    }
+
+    /**Создание мета-информации
+     *
+     * @param $key
+     * @param $description
+     * @return string
+     */
+    private function create_meta_info($key, $description){
+        $meta_id = $this->db->sql_execute($this->sql_create_meta_info, array('m_key' => $key, 'm_descr' => $description));
+        if ($meta_id && count($meta_id) > 0)
+            return $meta_id;
+        else
+            exit("Не удалось добавить мета-информацию. " . var_dump($meta_id));
     }
 
     /**
@@ -598,6 +824,10 @@ class Model_AdminTools extends Model
 
         return $menu_content;
     }
+
+
+
+
 
     /*private function check_password($pass){
 
