@@ -67,7 +67,7 @@
 
                 </div>
 
-                <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="col-lg-5 col-md-5 col-sm-5">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h3 class="panel-title">Сортировка разделов</h3>
@@ -91,7 +91,11 @@
                     </p>
                 </div>
 
-                <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="col-lg-2 col-md-2 col-sm-2">
+
+                </div>
+
+                <div class="col-lg-5 col-md-5 col-sm-5">
                     <div class="panel panel-danger">
                         <div class="panel-heading">
                             <h3 class="panel-title">Удаление разделов</h3>
@@ -107,9 +111,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-4 col-md-4 col-sm-4">
 
-                </div>
             </div>
 
             <div class="row">

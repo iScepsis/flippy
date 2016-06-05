@@ -1,11 +1,13 @@
 *{
+    font-family: Arial, sans-serif;
     font-size: 12pt;
+    outline: none !important;
 }
 
 .sortable li, #edit_sections li {
-    width: 300px;
+    width: 100%;
     min-height: 45px;
-    margin: 0 10px 10px 10px !important;
+    margin: 10px 0px !important;
     color: #fff;
     text-align: center;
     /*line-height: 45px;*/
@@ -13,10 +15,23 @@
     cursor: pointer;
 }
 
+#edit_pages li {
+    width: 100%;
+    min-height: 50px;
+    margin: 10px 0px !important;
+    color: #fff;
+    padding: 10px;
+    /*line-height: 45px;*/
+    overflow-x: hidden;
+    cursor: pointer;
+    border: 4px solid #df691a;
+    background-color: #485563 !important;
+}
+
 #drop_sections li {
-    width: 300px;
+    width: 100%;
     min-height: 45px;
-    margin: 0 10px 10px 10px !important;
+    margin: 10px 0px !important;
     color: #999;
     background-color: #3d4954 !important;
     text-align: center;
@@ -26,7 +41,7 @@
 }
 
 #drop_sections{
-    padding-top: 10px;
+    padding: 0 10px;
     border: 4px dashed #999;
     min-height: 50px;
 }
@@ -42,16 +57,16 @@
     border: 1px solid #2B3E50;
 }
 
-.drop_record, .drop_menu{
+.drop_item{
     color: #d9534f;
     cursor: pointer;
 }
 
-.drop_record:hover, .drop_menu:hover{
+.drop_item:hover{
     color: #df691a;
 }
 
-.drop_record:active, .drop_menu:active{
+.drop_item:active{
     color: #f0ad4e;
 }
 
@@ -86,16 +101,42 @@
 }
 
 .add-menu-sortable-active{
-    box-shadow: 0 0 10px #4385ff;
+    box-shadow: 0 0 10px #df691a;
 }
 
 .glyphicon-arrow-down:hover, .glyphicon-arrow-up:hover{
-    box-shadow: 0 0 7px #4385ff;
+    box-shadow: 0 0 7px #df691a;
     cursor: pointer;
 }
 
 .glyphicon-arrow-down:active, .glyphicon-arrow-up:active{
     color: #2B3E50;
+}
+
+.glyphicon-pencil{
+    color: #5cb85c;
+    cursor: pointer;
+}
+
+.glyphicon-pencil:hover{
+    color: #449D44;
+}
+
+.glyphicon-pencil:active{
+    color: #449D44;
+}
+
+.glyphicon-remove{
+    color: #d9534f;
+    cursor: pointer;
+}
+
+.glyphicon-remove:hover{
+    color: #C9302C;
+}
+
+.glyphicon-remove:active{
+    color: #C9302C;
 }
 
 .menu_loader{
@@ -104,3 +145,25 @@
     margin-left: -32px;
 }
 
+.question_mark{
+    font-weight: bold;
+    color: #df691a;
+}
+
+.question_mark:hover{
+     cursor: pointer;
+     color: #f0ad4e;
+}
+
+.question_mark:active{
+    color: #5bc0de;
+}
+
+.question_mark_text{
+    display: none;
+}
+
+.control-label{
+    font-weight: bold;
+    font-size: 12pt;
+}

@@ -26,7 +26,7 @@
                         <td>{$record.creation_date|date_format:"%d.%m.%Y %H:%M"}                                 </td>
                         <td>{$record.creator}                                                                    </td>
                         <td><a href="admintools/edit_record/record/{$record.id_record}">Редактировать</a>        </td>
-                        <td><p class="drop_record" onclick="ask_about_drop(this);">Удалить</p>                   </td>
+                        <td><p class="drop_item" onclick="ask_about_drop(this);">Удалить</p>                   </td>
                     </tr>
                 {/foreach}
             </tbody>

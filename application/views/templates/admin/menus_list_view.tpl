@@ -25,7 +25,7 @@
                             {if $menus.type_menu == 'tabs'}Вкладки{elseif $menus.type_menu == 'pills'}Кнопки{/if}
                         </td>
                         <td><a href="admintools/edit_menu/menu/{$menus.id_menu}">Редактировать</a>        </td>
-                        <td><p class="drop_menu" onclick="ask_about_drop(this);">Удалить</p>                   </td>
+                        <td><p class="drop_item" onclick="ask_about_drop(this);">Удалить</p>                   </td>
                         <td style="text-align: right">
                             <span class="glyphicon glyphicon-arrow-down" title="Предпросмотр" onclick="show_menu_preview(this, {$menus.id_menu});"></span>
                             <span class="glyphicon glyphicon-arrow-up" title="Скрыть" onclick="hide_menu_preview(this);" style="display: none;"></span>
